@@ -1,0 +1,34 @@
+{
+  "version": "7",
+  "dialect": "mysql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1769103108896,
+      "tag": "0000_first_sauron",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1769103245115,
+      "tag": "0001_melted_vin_gonzales",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1769104870123,
+      "tag": "0002_puzzling_victor_mancha",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1770066060553,
+      "tag": "0003_black_excalibur",
+      "breakpoints": true
+    }
+  ]
+}
