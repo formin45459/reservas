@@ -1,13 +1,14 @@
-import { drizzle } from "drizzle-orm/mysql2";
-import mysql from "mysql2/promise";
+import { drizzle } from "drizzle-orm/postgres-js";
+import postgres from "postgres";
 import bcrypt from "bcryptjs";
 import dotenv from "dotenv";
 import { users, rooms, clients, bookings } from "./drizzle/schema.ts";
 
 dotenv.config();
 
-const connection = await mysql.createConnection(process.env.DATABASE_URL);
-const db = drizzle(connection);
+const connectionString = process.env.DATABASE_URL;
+const sql = postgres(connectionString);
+const db = drizzle(sql);
 
 // Datos de ejemplo
 const seedData = {
@@ -346,13 +347,11 @@ async function seed() {
   try {
     // Limpiar tablas existentes
     console.log("🧽 Limpiando base de datos...");
-    await connection.execute("SET FOREIGN_KEY_CHECKS = 0");
-    await connection.execute("TRUNCATE TABLE bookings");
-    await connection.execute("TRUNCATE TABLE clients");
-    await connection.execute("TRUNCATE TABLE rooms");
-    await connection.execute("TRUNCATE TABLE users");
-    await connection.execute("TRUNCATE TABLE notifications");
-    await connection.execute("SET FOREIGN_KEY_CHECKS = 1");
+    await sql`DELETE FROM bookings`;
+    await sql`DELETE FROM notifications`;
+    await sql`DELETE FROM clients`;
+    await sql`DELETE FROM rooms`;
+    await sql`DELETE FROM users`;
     console.log("✓ Base de datos limpiada\n");
     // 1. Crear usuarios
     console.log("👤 Creando usuarios...");
@@ -366,8 +365,8 @@ async function seed() {
         loginMethod: 'local',
         role: userData.role,
         lastSignedIn: new Date(),
-      });
-      userIds.push(Number(result[0].insertId));
+      }).returning({ id: users.id });
+      userIds.push(result[0].id);
       console.log(`  ✓ Usuario creado: ${userData.email} (password: ${userData.password})`);
     }
 
@@ -383,8 +382,8 @@ async function seed() {
         description: room.description,
         isAvailable: room.isAvailable,
         createdBy: userIds[0],
-      });
-      roomIds.push(Number(result[0].insertId));
+      }).returning({ id: rooms.id });
+      roomIds.push(result[0].id);
       console.log(`  ✓ Sala creada: ${room.name}`);
     }
 
@@ -399,8 +398,8 @@ async function seed() {
         company: client.company,
         notes: client.notes,
         createdBy: userIds[0],
-      });
-      clientIds.push(Number(result[0].insertId));
+      }).returning({ id: clients.id });
+      clientIds.push(result[0].id);
       console.log(`  ✓ Cliente creado: ${client.name}`);
     }
 
@@ -475,9 +474,11 @@ async function seed() {
     console.log("  Usuario: maria@reservas.com / Maria#2026$Pass");
     console.log("  Usuario: carlos@reservas.com / Carlos&2026*Key");
 
+    await sql.end();
     process.exit(0);
   } catch (error) {
     console.error("\n❌ Error durante el seed:", error);
+    await sql.end();
     process.exit(1);
   }
 }
