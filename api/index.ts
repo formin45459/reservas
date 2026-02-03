@@ -8,7 +8,7 @@ const app = express();
 
 app.use(express.json());
 
-// tRPC endpoint
+// tRPC endpoint - note the path matches /api/trpc/*
 app.use(
   "/trpc",
   createExpressMiddleware({
@@ -17,4 +17,5 @@ app.use(
   })
 );
 
+// For Vercel serverless
 export default app;
